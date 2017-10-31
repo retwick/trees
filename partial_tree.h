@@ -39,8 +39,8 @@ int height(struct node* root);
 
 void printLevelOrder(struct node* root);
 
-struct node* rebuildTree(struct node *root);
-
 struct node* leftRotate(struct node *, int );
 
 struct node* rightRotate(struct node *, int );
+
+struct node * RBinsert(struct node* , int );

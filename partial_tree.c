@@ -4,7 +4,7 @@
 #include "partial_tree.h"  
 struct node
 {
-    int key;
+    int key, colour;
     struct node *left, *right, *parent;
 };
 
@@ -48,10 +48,68 @@ struct node* insert(struct node* root, int key){
 
 
 
+
+
+
+
+
 struct node * RBinsert(struct node* root, int key){
 	root = insert(root, key);
+	struct node *z =lookupNode(root, key);
+	struct node *y = NULL;
+	while(z->parent->colour == 0 && z->parent != z ){
+		if(z->parent== z->parent->parent->left){
+			y = z->parent->parent->right;
+			if(y->colour == 0){
+				//CASE 1
+				z->parent->colour = 1;
+				y->colour = 1;
+				z->parent->parent->colour = 0;
+				z = z->parent->parent;
+			}
+			else {
+				if(z == z->parent->right){
+					//CASE 2
+					z = z->parent;
+					root = leftRotate(root,z->key);
+				}
+				//CASE 3
+				z->parent->colour = 1;
+				z->parent->parent->colour = 0;
+				root = rightRotate(root, z->parent->parent->key);
+				z = z->parent;
+			}
+		}
+
+		else{
+			y = z->parent->parent->left;
+			if(y->colour == 0){
+				//CASE 1
+				z->parent->colour = 1;
+				y->colour = 1;
+				z->parent->parent->colour = 0;
+				z = z->parent->parent;
+			}
+			else{ 
+					if(z == z->parent->left){
+					//CASE 2
+					z = z->parent;
+					root = rightRotate(root,z->key);
+				}
+				//CASE 3
+				z->parent->colour = 1;
+				z->parent->parent->colour = 0;
+				root = leftRotate(root, z->parent->parent->key);
+				z=z->parent;
+			}
+		}
+	}
+	root->colour = 1;
 
 }
+
+
+
 
 
 
@@ -199,7 +257,7 @@ void printLevelOrder(struct node* root)
  
     while (temp_node)
     {
-        printf("%d : %d \n", temp_node->key, temp_node->parent->key);
+        printf("%d : %d :: %d\n", temp_node->key, temp_node->parent->key, temp_node->colour);
  
         /*Enqueue left child */
         if (temp_node->left)
