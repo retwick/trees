@@ -3,13 +3,13 @@
 arguments: key
 return: pointer to the node created
 */
-struct node* createNode(int key);
+struct node* createNode(int );
 
-/*insert by maintaining BST property
+/*insert by maintaining red-black property
 arguments: pointer to root of tree, key
 return: pointer to root.
 */
-struct node* insert(struct node* root, int key);
+struct node* RBinsert(struct node* , int );
 
 /*function to delete a node
 arguments: pointer to the root, key
@@ -28,19 +28,18 @@ function to find minimum value stored in the tree
 arguments: pointer to the root
 return: min value
 */
-struct node * minVal(struct node* root);
+struct node * minVal(struct node* );
 
 /*
 function to get height of node
 arguments: pointer to the node
 return: heighht of node
 */
-int height(struct node* root);
+int height(struct node* );
 
-void printLevelOrder(struct node* root);
+void printLevelOrder(struct node* );
 
 struct node* leftRotate(struct node *, int );
 
 struct node* rightRotate(struct node *, int );
 
-struct node * RBinsert(struct node* , int );

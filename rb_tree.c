@@ -1,7 +1,7 @@
 // C program to demonstrate insert operation in binary search tree
 #include <stdio.h>
 #include <stdlib.h>
-#include "partial_tree.h"  
+#include "rb_tree.h"  
 struct node
 {
     int key, colour;
@@ -46,7 +46,7 @@ struct node* insert(struct node* root, int key){
 
 
 
-struct node * RBinsert(struct node* root, int key){
+struct node* RBinsert(struct node* root, int key){
 	root = insert(root, key);
 	struct node *z =lookupNode(root, key);
 	struct node *y = NULL;
