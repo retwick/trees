@@ -46,13 +46,6 @@ struct node* insert(struct node* root, int key){
 
 
 
-
-
-
-
-
-
-
 struct node * RBinsert(struct node* root, int key){
 	root = insert(root, key);
 	struct node *z =lookupNode(root, key);
@@ -60,7 +53,7 @@ struct node * RBinsert(struct node* root, int key){
 	while(z->parent->colour == 0 && z->parent != z ){
 		if(z->parent== z->parent->parent->left){
 			y = z->parent->parent->right;
-			if(y->colour == 0){
+			if((y != NULL) && (y->colour == 0)){
 				//CASE 1
 				z->parent->colour = 1;
 				y->colour = 1;
@@ -83,7 +76,7 @@ struct node * RBinsert(struct node* root, int key){
 
 		else{
 			y = z->parent->parent->left;
-			if(y->colour == 0){
+			if(y!= NULL && y->colour == 0){
 				//CASE 1
 				z->parent->colour = 1;
 				y->colour = 1;
@@ -107,13 +100,6 @@ struct node * RBinsert(struct node* root, int key){
 	root->colour = 1;
 
 }
-
-
-
-
-
-
-
 
 /*function to delete a node
 	assuming the node to be deleted is the root of the subtree we delete the node.
