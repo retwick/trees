@@ -377,7 +377,7 @@ struct node* RBheightfix(struct node* root){
 			root = RBheightfix(root);
 		}		
 	}
-	root = RBheightfix(root);
+	//root = RBheightfix(root);
 	return(root);
 }
 
