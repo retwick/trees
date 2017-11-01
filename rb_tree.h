@@ -43,4 +43,6 @@ struct node* leftRotate(struct node *, int );
 
 struct node* rightRotate(struct node *, int );
 
-struct node* RBcolour(struct node **root, int key);
+void RBcolour(struct node **root, int key);
+
+struct node* findDoubleBlack(struct node* );

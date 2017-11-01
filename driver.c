@@ -3,11 +3,10 @@
 #include <time.h>
 #include <stdlib.h>
 
-
-
 int main(int argc, char const *argv[])
 {
     struct node* root = NULL;
+    struct node* ptr = NULL;
     root = RBinsert(root,3);
     root = RBinsert(root,2);
     root = RBinsert(root,5);
@@ -25,9 +24,12 @@ int main(int argc, char const *argv[])
     //root = RBcolour(root,1);
     //root = RBcolour(root,6);
     //RBcolour(&root,4);
-    root = delete(root,10);
+    root = delete(root,4);
     printLevelOrder(root);
-    printf("\n");
+    ptr = findDoubleBlack(root);
+    if(ptr == NULL)
+        printf("NULL\n");
+    
  
     return 0;
 }

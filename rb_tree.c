@@ -109,7 +109,7 @@ struct node* RBinsert(struct node* root, int key){
 *************************************************************************/
 //function to push black colour
 
-struct node* RBcolour(struct node **root, int key){
+void RBcolour(struct node **root, int key){
 	//v is the node to be deleted
 	//u is the node to replace v
 	
@@ -129,7 +129,7 @@ struct node* RBcolour(struct node **root, int key){
 		u = v->parent;
 		u->colour += v->colour;
 	}	
-	return u;
+	return ;
 }
 
 
@@ -141,7 +141,7 @@ return: pointer to the root of the subtree where node is deleted
 
 //implement parent relations
 struct node* delete(struct node* root,int key){
-	struct node *x;
+	
 	if(root == NULL){
 		return root;
 	}
@@ -149,13 +149,13 @@ struct node* delete(struct node* root,int key){
 		//node is a red leaf
 		//done
 		if((root->left == NULL)&&(root->right == NULL)){	
-			x = RBcolour(&root,root->key);	
+			RBcolour(&root,root->key);	
 			free(root);
 			return NULL;
 		}
 		//has only right sub tree
 		else if(root->left == NULL){
-			x = RBcolour(&root,root->key);			
+			RBcolour(&root,root->key);			
 			struct node* temp = root;
 			root->right->parent =  root->parent;
 			free(root);
@@ -163,7 +163,7 @@ struct node* delete(struct node* root,int key){
 		}
 		//has only left sub tree
 		else if(root->right == NULL){
-			x = RBcolour(&root,root->key);
+			RBcolour(&root,root->key);
 			struct node* temp = root;
 			root->left->parent =  root->parent;
 			free(root);
@@ -192,9 +192,25 @@ struct node* delete(struct node* root,int key){
 	return root;
 }
 
-struct node * RBbhFix(struct node* root){
-
+void dbprint(struct node* root){
+	struct node * ptr = findDoubleBlack(root);
+	printf("inside function%d\n", ptr->key);
 }
+
+struct node * findDoubleBlack(struct node* root){
+	struct node *x = NULL; 
+	if(root->colour == 2)
+		return root;
+	if(root->left != NULL)
+		x = findDoubleBlack(root->left);
+		if(x != NULL) return x;
+		
+	if ((x == NULL) && (root->right != NULL))
+		x = findDoubleBlack(root->right);
+	return x;
+}
+
+
 /*query an element
 arguments: pointer to root of tree, query element
 return: pointer to node with key == query
