@@ -196,6 +196,7 @@ void RBheightfix(struct node* root){
 	//check if x is root, drop the double black
 	if(x->parent == x){
 		x->colour = 1;
+		return ;
 	}
 	struct node* s;
 	//case 1: x is left child of p(x)
@@ -207,7 +208,7 @@ void RBheightfix(struct node* root){
 			if(s->left->colour == 1 && s->right->colour ==0){
 				/*
 				s.right.col to black
-				exchange colour of s and p(x)
+				swap colour of s and p(x)
 				left rotate at p(x)
 				make x single black
 				*/
@@ -216,7 +217,7 @@ void RBheightfix(struct node* root){
 				t = s->colour;
 				s->colour = x->parent->colour;
 				x->parent->colour = t;
-				leftRotate(root, x->parent->key);
+				root = leftRotate(root, x->parent->key);
 				x->colour = 1;
 
 			}
@@ -224,7 +225,7 @@ void RBheightfix(struct node* root){
 			if(s->left->colour == 0 && s->right->colour ==0){
 				/*
 				s.right.col to black
-				exchange colour of s and p(x)
+				swap colour of s and p(x)
 				left rotate at p(x)
 				make x single black
 				*/
@@ -233,7 +234,7 @@ void RBheightfix(struct node* root){
 				t = s->colour;
 				s->colour = x->parent->colour;
 				x->parent->colour = t;
-				leftRotate(root, x->parent->key);
+				root = leftRotate(root, x->parent->key);
 				x->colour = 1;
 
 			}
@@ -244,31 +245,123 @@ void RBheightfix(struct node* root){
 				right rotate at s
 				reduces to case 1.1.1
 				*/
+				int t;
+				t = s->colour;
+				s->colour = s->left->colour;
+				s->left->colour = t;
+				root = rightRotate(root, s);
+				RBheightfix(root);
 
 			}
 			//case 1.1.4 s.left is black, s.right is black
 			if(s->left->colour == 1 && s->right->colour == 1){
 				/*
-				push blackness to p(x)
+				push blackness of x to p(x)
 				p(x) will become double black if initially black 
 				--this reduces to previous case with new x as p(x) 			
 				make s red				
 				*/
+				x->parent->colour = x->parent->colour + 1;
+				RBheightfix(root);
+				s->colour = 0;
 
 			}
 		}
 		//case 1.2 s is red
 		else{
 			/*
+			swap p(x).col and s.col
 			left rotate at p(x)
 			reduces to case 1.1
 			*/
+			x->parent->colour = 0;
+			s->colour = 1;
+			root = leftRotate(root,x->parent);
+			RBheightfix(root);
 		}
 
 	}
 	//case 2: x is right child of p(x)
 	else{
 		s= x->parent->left;
+
+		//case 2.1 s is black
+		if(s->colour == 1){
+			//case 2.1.1 s.right is black, s.left is red
+			if(s->right->colour == 1 && s->left->colour ==0){
+				/*
+				s.left.col to black
+				swap colour of s and p(x)
+				right rotate at p(x)
+				make x single black
+				*/
+				s->left->colour = 1;
+				int t;
+				t = s->colour;
+				s->colour = x->parent->colour;
+				x->parent->colour = t;
+				root = rightRotate(root, x->parent->key);
+				x->colour = 1;
+
+			}
+			//case 2.1.2 s.right is red,   s.left is red
+			if(s->right->colour == 0 && s->left->colour ==0){
+				/*
+				s.left.col to black
+				swap colour of s and p(x)
+				right rotate at p(x)
+				make x single black
+				*/
+				s->left->colour = 1;
+				int t;
+				t = s->colour;
+				s->colour = x->parent->colour;
+				x->parent->colour = t;
+				root = rightRotate(root, x->parent->key);
+				x->colour = 1;
+
+			}
+			//case 2.1.3 s.right is red,   s.left is black
+			if(s->right->colour == 0 && s->left->colour ==1){
+				/*
+				swap s.colour and s.right.colour
+				left rotate at s
+				reduces to case 2.1.1
+				*/
+				int t;
+				t = s->colour;
+				s->colour = s->right->colour;
+				s->right->colour = t;
+				root = leftRotate(root, s);
+				RBheightfix(root);
+
+			}
+			//case 2.1.4 s.right is black, s.left is black
+			if(s->right->colour == 1 && s->left->colour == 1){
+				/*
+				push blackness of x to p(x)
+				p(x) will become double black if initially black 
+				--this reduces to previous case with new x as p(x) 			
+				make s red				
+				*/
+				x->parent->colour = x->parent->colour + 1;
+				RBheightfix(root);
+				s->colour = 0;
+
+			}
+		}
+		//case 2.2 s is red
+		else{
+			/*
+			swap p(x).col and s.col
+			right rotate at p(x)
+			reduces to case 2.1
+			*/
+			x->parent->colour = 0;
+			s->colour = 1;
+			root = rightRotate(root,x->parent);
+			RBheightfix(root);
+		}		
 	}
 }
 
