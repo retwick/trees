@@ -15,7 +15,7 @@ struct node* RBinsert(struct node* , int );
 arguments: pointer to the root, key
 return: pointer to the root of the subtree where node is deleted
 */
-struct node* delete(struct node* ,int);
+struct node* delete(struct node** ,int);
 
 /*query an element
 arguments: pointer to root of tree, query element

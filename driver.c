@@ -5,8 +5,8 @@
 
 int main(int argc, char const *argv[])
 {
+    void dbprint(struct node*);
     struct node* root = NULL;
-    struct node* ptr = NULL;
     root = RBinsert(root,3);
     root = RBinsert(root,2);
     root = RBinsert(root,5);
@@ -24,11 +24,15 @@ int main(int argc, char const *argv[])
     //root = RBcolour(root,1);
     //root = RBcolour(root,6);
     //RBcolour(&root,4);
-    root = delete(root,4);
+    delete(&root,4);
+    delete(&root,2);
+    delete(&root,3);
+    delete(&root,6);
+    delete(&root,15);
+    delete(&root,8);
+    RBheightfix(root);
     printLevelOrder(root);
-    ptr = findDoubleBlack(root);
-    if(ptr == NULL)
-        printf("NULL\n");
+    
     
  
     return 0;

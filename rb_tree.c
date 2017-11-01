@@ -104,9 +104,6 @@ struct node* RBinsert(struct node* root, int key){
 
 }
 
-/*************************************************************************
- IMPLEMENT SENTINEL NODE
-*************************************************************************/
 //function to push black colour
 
 void RBcolour(struct node **root, int key){
@@ -140,33 +137,33 @@ return: pointer to the root of the subtree where node is deleted
 */
 
 //implement parent relations
-struct node* delete(struct node* root,int key){
+struct node* delete(struct node** root,int key){
 	
-	if(root == NULL){
-		return root;
+	if(*root == NULL){
+		return *root;
 	}
-	if(key == root->key){
+	if(key == (*root)->key){
 		//node is a red leaf
 		//done
-		if((root->left == NULL)&&(root->right == NULL)){	
-			RBcolour(&root,root->key);	
-			free(root);
+		if(((*root)->left == NULL)&&((*root)->right == NULL)){	
+			RBcolour(root,(*root)->key);	
+			free(*root);
 			return NULL;
 		}
 		//has only right sub tree
-		else if(root->left == NULL){
-			RBcolour(&root,root->key);			
-			struct node* temp = root;
-			root->right->parent =  root->parent;
-			free(root);
+		else if((*root)->left == NULL){
+			RBcolour(root,(*root)->key);			
+			struct node* temp = *root;
+			(*root)->right->parent =  (*root)->parent;
+			free(*root);
 			return temp->right;
 		}
 		//has only left sub tree
-		else if(root->right == NULL){
-			RBcolour(&root,root->key);
-			struct node* temp = root;
-			root->left->parent =  root->parent;
-			free(root);
+		else if((*root)->right == NULL){
+			RBcolour(root,(*root)->key);
+			struct node* temp = *root;
+			(*root)->left->parent =  (*root)->parent;
+			free(*root);
 			return temp->left;
 		}
 		/*
@@ -177,24 +174,102 @@ struct node* delete(struct node* root,int key){
 		x will not have two subtrees, so this is reduced to previous case
 		*/
 		else{
-			int x = (minVal(root->right))->key;
-			root->key = x;
-			root->right = delete(root->right,x);
-			return root;
+			int x = (minVal((*root)->right))->key;
+			(*root)->key = x;
+			(*root)->right = delete(&(*root)->right,x);
+			return *root;
 		}
 	}
-	else if(key < root->key){
-		root->left = delete(root->left,key);
+	else if(key < (*root)->key){
+		(*root)->left = delete(&(*root)->left,key);
 	}
-	else if(key > root->key){
-		root->right = delete(root->right,key);
+	else if(key > (*root)->key){
+		(*root)->right = delete(&(*root)->right,key);
 	}
-	return root;
+	return *root;
 }
 
-void dbprint(struct node* root){
-	struct node * ptr = findDoubleBlack(root);
-	printf("inside function%d\n", ptr->key);
+void RBheightfix(struct node* root){
+	struct node * x = findDoubleBlack(root);
+	//printf("inside function: %d\n", x->key);
+
+	//check if x is root, drop the double black
+	if(x->parent == x){
+		x->colour = 1;
+	}
+	struct node* s;
+	//case 1: x is left child of p(x)
+	if(x == x->parent->left){
+		s = x->parent->right;
+		//case 1.1 s is black
+		if(s->colour == 1){
+			//case 1.1.1 s.left is black, s.right is red
+			if(s->left->colour == 1 && s->right->colour ==0){
+				/*
+				s.right.col to black
+				exchange colour of s and p(x)
+				left rotate at p(x)
+				make x single black
+				*/
+				s->right->colour = 1;
+				int t;
+				t = s->colour;
+				s->colour = x->parent->colour;
+				x->parent->colour = t;
+				leftRotate(root, x->parent->key);
+				x->colour = 1;
+
+			}
+			//case 1.1.2 s.left is red,   s.right is red
+			if(s->left->colour == 0 && s->right->colour ==0){
+				/*
+				s.right.col to black
+				exchange colour of s and p(x)
+				left rotate at p(x)
+				make x single black
+				*/
+				s->right->colour = 1;
+				int t;
+				t = s->colour;
+				s->colour = x->parent->colour;
+				x->parent->colour = t;
+				leftRotate(root, x->parent->key);
+				x->colour = 1;
+
+			}
+			//case 1.1.3 s.left is red,   s.right is black
+			if(s->left->colour == 0 && s->right->colour ==1){
+				/*
+				swap s.colour and s.left.colour
+				right rotate at s
+				reduces to case 1.1.1
+				*/
+
+			}
+			//case 1.1.4 s.left is black, s.right is black
+			if(s->left->colour == 1 && s->right->colour == 1){
+				/*
+				push blackness to p(x)
+				p(x) will become double black if initially black 
+				--this reduces to previous case with new x as p(x) 			
+				make s red				
+				*/
+
+			}
+		}
+		//case 1.2 s is red
+		else{
+			/*
+			left rotate at p(x)
+			reduces to case 1.1
+			*/
+		}
+
+	}
+	//case 2: x is right child of p(x)
+	else{
+		s= x->parent->left;
+	}
 }
 
 struct node * findDoubleBlack(struct node* root){
@@ -204,7 +279,7 @@ struct node * findDoubleBlack(struct node* root){
 	if(root->left != NULL)
 		x = findDoubleBlack(root->left);
 		if(x != NULL) return x;
-		
+
 	if ((x == NULL) && (root->right != NULL))
 		x = findDoubleBlack(root->right);
 	return x;
