@@ -8,6 +8,8 @@ struct node
     struct node *left, *right, *parent;
 };
 
+
+
 /*creating a new node
 arguments: key
 return: pointer to the node created
@@ -22,6 +24,7 @@ struct node* createNode(int key){
 	temp->colour = 0;
 	return temp;
 }
+
 
 /*insert by maintaining BST property. only distinct values will be inserted
 arguments: pointer to root of tree, key
@@ -101,6 +104,42 @@ struct node* RBinsert(struct node* root, int key){
 
 }
 
+/*************************************************************************
+MUST IMPLEMENT SENTINEL NODE
+*************************************************************************/
+
+struct node* RBcolour(struct node *root, int key){
+	//v is the node to be deleted
+	//u is the node to replace v
+	
+	struct node* v = lookupNode(root, key);
+	struct node* u ;
+	//deleting a node with atleast one child
+	if(v->left != NULL && v->right == NULL){
+		u = v->left;
+		u->colour = 1;
+	}
+	else if(v->left == NULL && v->right != NULL){
+		u = v->right;
+		u->colour = 1;
+	}
+	//delting leaf node
+	else if(v->left == NULL && v->right == NULL){
+		u = v->parent;
+/*		u->parent = v->parent->parent;
+		if(u->parent->key < v->parent->parent->key)
+			v->parent->parent->left = u;
+		else
+			v->parent->parent->right = u;
+*/
+		u->colour += v->colour;
+	}
+	
+	return root;
+
+}
+
+
 /*function to delete a node
 	assuming the node to be deleted is the root of the subtree we delete the node.
 arguments: pointer to the root, key
@@ -111,19 +150,23 @@ struct node* delete(struct node* root,int key){
 		return root;
 	}
 	if(key == root->key){
-		//node is a leaf
-		if((root->left == NULL)&&(root->right == NULL)){
+		//node is a red leaf
+		//done
+		if((root->left == NULL)&&(root->right == NULL)){	
+			root = RBcolour(root,root->key);	
 			free(root);
 			return NULL;
 		}
 		//has only right sub tree
 		else if(root->left == NULL){
+			root = RBcolour(root,root->key);
 			struct node* temp = root;
 			free(root);
 			return temp->right;
 		}
 		//has only left sub tree
 		else if(root->right == NULL){
+			root = RBcolour(root,root->key);
 			struct node* temp = root;
 			free(root);
 			return temp->left;
@@ -297,11 +340,13 @@ struct node* leftRotate(struct node *root, int key){
 
 
 	ptr->right = ptr->right->left;
+	//!=NIL
 	if(ptr_right->left!=NULL)
 		ptr_right->left->parent = ptr;
 	
 	ptr_right->parent = ptr->parent;
 	
+	// == NIL
 	if(ptr->parent == ptr){
 		root = ptr_right;
 	}
