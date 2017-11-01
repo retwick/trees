@@ -3,6 +3,8 @@
 #include <time.h>
 #include <stdlib.h>
 
+struct node* RBheightfix(struct node* );
+
 int main(int argc, char const *argv[])
 {
     void dbprint(struct node*);
@@ -25,12 +27,9 @@ int main(int argc, char const *argv[])
     //root = RBcolour(root,6);
     //RBcolour(&root,4);
     delete(&root,4);
-    delete(&root,2);
-    delete(&root,3);
-    delete(&root,6);
-    delete(&root,15);
-    delete(&root,8);
-    RBheightfix(root);
+    printLevelOrder(root);
+    printf(" \n");
+    root = RBheightfix(root);
     printLevelOrder(root);
     
     

@@ -189,19 +189,29 @@ struct node* delete(struct node** root,int key){
 	return *root;
 }
 
-void RBheightfix(struct node* root){
+struct node* RBheightfix(struct node* root){
+	if(root == NULL){
+		return NULL;
+	}
 	struct node * x = findDoubleBlack(root);
 	//printf("inside function: %d\n", x->key);
-
+	if(x == NULL){
+		//printf("no more double black\n");
+		return root;
+	}
+	printf("inside RBheightfix: x = %d\n", x->key);
+	printLevelOrder(root);
+	printf(" \n");
 	//check if x is root, drop the double black
 	if(x->parent == x){
 		x->colour = 1;
-		return ;
+		return x;
 	}
 	struct node* s;
 	//case 1: x is left child of p(x)
 	if(x == x->parent->left){
 		s = x->parent->right;
+		if(s == NULL) return root;
 		//case 1.1 s is black
 		if(s->colour == 1){
 			//case 1.1.1 s.left is black, s.right is red
@@ -219,6 +229,9 @@ void RBheightfix(struct node* root){
 				x->parent->colour = t;
 				root = leftRotate(root, x->parent->key);
 				x->colour = 1;
+				printf("case 1.1.1 left rotate x = %d height = %d\n", x->key,height(root) );
+				printLevelOrder(root);
+				printf(" \n");
 
 			}
 			//case 1.1.2 s.left is red,   s.right is red
@@ -249,8 +262,8 @@ void RBheightfix(struct node* root){
 				t = s->colour;
 				s->colour = s->left->colour;
 				s->left->colour = t;
-				root = rightRotate(root, s);
-				RBheightfix(root);
+				root = rightRotate(root, s->key);
+				root = RBheightfix(root);
 
 			}
 			//case 1.1.4 s.left is black, s.right is black
@@ -262,7 +275,7 @@ void RBheightfix(struct node* root){
 				make s red				
 				*/
 				x->parent->colour = x->parent->colour + 1;
-				RBheightfix(root);
+				root = RBheightfix(root);
 				s->colour = 0;
 
 			}
@@ -276,15 +289,16 @@ void RBheightfix(struct node* root){
 			*/
 			x->parent->colour = 0;
 			s->colour = 1;
-			root = leftRotate(root,x->parent);
-			RBheightfix(root);
+			root = leftRotate(root,x->parent->key);
+			root = RBheightfix(root);
 		}
 
 	}
 	//case 2: x is right child of p(x)
 	else{
 		s= x->parent->left;
-
+		//test
+		if(s == NULL) return root;
 		//case 2.1 s is black
 		if(s->colour == 1){
 			//case 2.1.1 s.right is black, s.left is red
@@ -332,8 +346,8 @@ void RBheightfix(struct node* root){
 				t = s->colour;
 				s->colour = s->right->colour;
 				s->right->colour = t;
-				root = leftRotate(root, s);
-				RBheightfix(root);
+				root = leftRotate(root, s->key);
+				root = RBheightfix(root);
 
 			}
 			//case 2.1.4 s.right is black, s.left is black
@@ -345,7 +359,7 @@ void RBheightfix(struct node* root){
 				make s red				
 				*/
 				x->parent->colour = x->parent->colour + 1;
-				RBheightfix(root);
+				root = RBheightfix(root);
 				s->colour = 0;
 
 			}
@@ -359,10 +373,12 @@ void RBheightfix(struct node* root){
 			*/
 			x->parent->colour = 0;
 			s->colour = 1;
-			root = rightRotate(root,x->parent);
-			RBheightfix(root);
+			root = rightRotate(root,x->parent->key);
+			root = RBheightfix(root);
 		}		
 	}
+	root = RBheightfix(root);
+	return(root);
 }
 
 struct node * findDoubleBlack(struct node* root){
