@@ -105,14 +105,15 @@ struct node* RBinsert(struct node* root, int key){
 }
 
 /*************************************************************************
-MUST IMPLEMENT SENTINEL NODE
+ IMPLEMENT SENTINEL NODE
 *************************************************************************/
+//function to push black colour
 
-struct node* RBcolour(struct node *root, int key){
+struct node* RBcolour(struct node **root, int key){
 	//v is the node to be deleted
 	//u is the node to replace v
 	
-	struct node* v = lookupNode(root, key);
+	struct node* v = lookupNode(*root, key);
 	struct node* u ;
 	//deleting a node with atleast one child
 	if(v->left != NULL && v->right == NULL){
@@ -126,26 +127,21 @@ struct node* RBcolour(struct node *root, int key){
 	//delting leaf node
 	else if(v->left == NULL && v->right == NULL){
 		u = v->parent;
-/*		u->parent = v->parent->parent;
-		if(u->parent->key < v->parent->parent->key)
-			v->parent->parent->left = u;
-		else
-			v->parent->parent->right = u;
-*/
 		u->colour += v->colour;
-	}
-	
-	return root;
-
+	}	
+	return u;
 }
 
 
 /*function to delete a node
-	assuming the node to be deleted is the root of the subtree we delete the node.
+assuming the node to be deleted is the root of the subtree we delete the node.
 arguments: pointer to the root, key
 return: pointer to the root of the subtree where node is deleted
 */
+
+//implement parent relations
 struct node* delete(struct node* root,int key){
+	struct node *x;
 	if(root == NULL){
 		return root;
 	}
@@ -153,21 +149,23 @@ struct node* delete(struct node* root,int key){
 		//node is a red leaf
 		//done
 		if((root->left == NULL)&&(root->right == NULL)){	
-			root = RBcolour(root,root->key);	
+			x = RBcolour(&root,root->key);	
 			free(root);
 			return NULL;
 		}
 		//has only right sub tree
 		else if(root->left == NULL){
-			root = RBcolour(root,root->key);
+			x = RBcolour(&root,root->key);			
 			struct node* temp = root;
+			root->right->parent =  root->parent;
 			free(root);
 			return temp->right;
 		}
 		//has only left sub tree
 		else if(root->right == NULL){
-			root = RBcolour(root,root->key);
+			x = RBcolour(&root,root->key);
 			struct node* temp = root;
+			root->left->parent =  root->parent;
 			free(root);
 			return temp->left;
 		}
@@ -192,6 +190,10 @@ struct node* delete(struct node* root,int key){
 		root->right = delete(root->right,key);
 	}
 	return root;
+}
+
+struct node * RBbhFix(struct node* root){
+
 }
 /*query an element
 arguments: pointer to root of tree, query element

@@ -24,7 +24,8 @@ int main(int argc, char const *argv[])
  
     //root = RBcolour(root,1);
     //root = RBcolour(root,6);
-    root = RBcolour(root,4);
+    //RBcolour(&root,4);
+    root = delete(root,10);
     printLevelOrder(root);
     printf("\n");
  
