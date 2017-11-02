@@ -15,33 +15,38 @@ arguments: key
 return: pointer to the node created
 colour field 0 means red 1 means black
 */
-struct node* createNode(int key){
+struct node* createNode(int key,struct node* nil){
 	struct node* temp = (struct node*)malloc(sizeof(struct node));
 	temp->key = key;
-	temp->left = NULL;
-	temp->right = NULL;
-	temp->parent = NULL;
+	temp->left   = nil;
+	temp->right  = nil;
+	temp->parent = nil;
 	temp->colour = 0;
 	return temp;
 }
 
+struct node* createNil(struct node **ptr){
+	*ptr = createNode(-1,*ptr);
+    printf("nil %d\n", (*ptr)->key);
+    (*ptr)->colour = 1;
+}
 
 /*insert by maintaining BST property. only distinct values will be inserted
 arguments: pointer to root of tree, key
 return: pointer to root.(necessary as we are using a recursive method)
 */
-struct node* insert(struct node* root, int key){
-	if(root == NULL){
-		struct node *temp = createNode(key);
-		temp->parent = temp;
+struct node* insert(struct node* root, int key,struct node* nil){
+	if(root == nil){
+		struct node *temp = createNode(key,nil);
+		temp->parent = nil;
 		return temp;
 	}
 	else if(key < root->key){
-		root->left = insert(root->left, key);
+		root->left = insert(root->left, key, nil);
 		root->left->parent = root;
 	}
 	else if(key > root->key){
-		root->right = insert(root->right, key);
+		root->right = insert(root->right, key, nil);
 		root->right->parent = root;
 	}
 	return root;
@@ -49,14 +54,16 @@ struct node* insert(struct node* root, int key){
 
 
 
-struct node* RBinsert(struct node* root, int key){
-	root = insert(root, key);
+struct node* RBinsert(struct node* root, int key, struct node* nil){
+	root = insert(root, key, nil);
 	struct node *z =lookupNode(root, key);
-	struct node *y = NULL;
-	while(z->parent->colour == 0 && z->parent != z ){
-		if(z->parent== z->parent->parent->left){
+	struct node *y = nil;
+	while(z->colour != 1 && z != root && z->parent->colour == 0){
+		//Parent of z is left child of Grand-parent of z
+		if(z->parent == z->parent->parent->left){
+			//y is the uncle of z
 			y = z->parent->parent->right;
-			if((y != NULL) && (y->colour == 0)){
+			if((y != nil) && (y->colour == 0)){
 				//CASE 1
 				z->parent->colour = 1;
 				y->colour = 1;
@@ -79,7 +86,7 @@ struct node* RBinsert(struct node* root, int key){
 
 		else{
 			y = z->parent->parent->left;
-			if(y!= NULL && y->colour == 0){
+			if(y!= nil && y->colour == 0){
 				//CASE 1
 				z->parent->colour = 1;
 				y->colour = 1;
@@ -101,7 +108,6 @@ struct node* RBinsert(struct node* root, int key){
 		}
 	}
 	root->colour = 1;
-
 }
 
 //function to push black colour
@@ -189,7 +195,7 @@ struct node* delete(struct node** root,int key){
 	return *root;
 }
 
-struct node* RBheightfix(struct node* root){
+struct node* RBheightfix(struct node* root, struct node* nil){
 	if(root == NULL){
 		return NULL;
 	}
@@ -200,7 +206,7 @@ struct node* RBheightfix(struct node* root){
 		return root;
 	}
 	printf("inside RBheightfix: x = %d\n", x->key);
-	printLevelOrder(root);
+	printLevelOrder(root, nil);
 	printf(" \n");
 	//check if x is root, drop the double black
 	if(x->parent == x){
@@ -229,8 +235,8 @@ struct node* RBheightfix(struct node* root){
 				x->parent->colour = t;
 				root = leftRotate(root, x->parent->key);
 				x->colour = 1;
-				printf("case 1.1.1 left rotate x = %d height = %d\n", x->key,height(root) );
-				printLevelOrder(root);
+				printf("case 1.1.1 left rotate x = %d height = %d\n", x->key,height(root,nil) );
+				printLevelOrder(root,nil);
 				printf(" \n");
 
 			}
@@ -263,7 +269,7 @@ struct node* RBheightfix(struct node* root){
 				s->colour = s->left->colour;
 				s->left->colour = t;
 				root = rightRotate(root, s->key);
-				root = RBheightfix(root);
+				root = RBheightfix(root,nil);
 
 			}
 			//case 1.1.4 s.left is black, s.right is black
@@ -275,7 +281,7 @@ struct node* RBheightfix(struct node* root){
 				make s red				
 				*/
 				x->parent->colour = x->parent->colour + 1;
-				root = RBheightfix(root);
+				root = RBheightfix(root,nil);
 				s->colour = 0;
 
 			}
@@ -290,7 +296,7 @@ struct node* RBheightfix(struct node* root){
 			x->parent->colour = 0;
 			s->colour = 1;
 			root = leftRotate(root,x->parent->key);
-			root = RBheightfix(root);
+			root = RBheightfix(root,nil);
 		}
 
 	}
@@ -347,7 +353,7 @@ struct node* RBheightfix(struct node* root){
 				s->colour = s->right->colour;
 				s->right->colour = t;
 				root = leftRotate(root, s->key);
-				root = RBheightfix(root);
+				root = RBheightfix(root,nil);
 
 			}
 			//case 2.1.4 s.right is black, s.left is black
@@ -359,7 +365,7 @@ struct node* RBheightfix(struct node* root){
 				make s red				
 				*/
 				x->parent->colour = x->parent->colour + 1;
-				root = RBheightfix(root);
+				root = RBheightfix(root,nil);
 				s->colour = 0;
 
 			}
@@ -374,7 +380,7 @@ struct node* RBheightfix(struct node* root){
 			x->parent->colour = 0;
 			s->colour = 1;
 			root = rightRotate(root,x->parent->key);
-			root = RBheightfix(root);
+			root = RBheightfix(root,nil);
 		}		
 	}
 	//root = RBheightfix(root);
@@ -431,12 +437,12 @@ function to get height of node
 arguments: pointer to the node
 return: heighht of node
 */
-int height(struct node* root){
-	if(root == NULL)
-		return 0;
+int height(struct node* root, struct node* nil){
+	if(root == nil)
+		return 1;
 
-	int h_LST = height(root->left);
-	int h_RST = height(root->right);
+	int h_LST = height(root->left,nil);
+	int h_RST = height(root->right,nil);
 	int maxH;
 	if(h_LST < h_RST){
 		maxH = h_RST + 1;
@@ -444,7 +450,7 @@ int height(struct node* root){
 	else{
 		maxH = h_RST + 1;
 	}
-	return maxH;
+	return (maxH);
 }
 
 int randomKey(struct node* root){
@@ -480,30 +486,33 @@ struct node *deQueue(struct node **, int *);
  
 /* Given a binary tree, print its nodes in level order
    using array for implementing queue */
-void printLevelOrder(struct node* root)
+/*
+void printLevelOrder(struct node* root, struct node* nil)
 {
     int rear, front;
     struct node **queue = createQueue(&front, &rear);
     struct node *temp_node = root;
  
-    while (temp_node)
+    while (temp_node != nil)
     {
-        printf("%d : %d :: %d\n", temp_node->key, temp_node->parent->key, temp_node->colour);
- 
-        /*Enqueue left child */
-        if (temp_node->left)
+        printf("%d ::: %d\n", temp_node->key, temp_node->colour);
+ 		
+
+
+        //Enqueue left child 
+        if (temp_node->left != nil)
             enQueue(queue, &rear, temp_node->left);
  
-        /*Enqueue right child */
-        if (temp_node->right)
+        //Enqueue right child 
+        if (temp_node->right != nil )
             enQueue(queue, &rear, temp_node->right);
  
-        /*Dequeue node and make it temp_node*/
+        //Dequeue node and make it temp_node
         temp_node = deQueue(queue, &front);
     }
 }
  
-/*UTILITY FUNCTIONS*/
+//UTILITY FUNCTIONS
 struct node** createQueue(int *front, int *rear)
 {
     struct node **queue =
@@ -524,6 +533,7 @@ struct node *deQueue(struct node **queue, int *front)
     (*front)++;
     return queue[*front - 1];
 }
+*/
 
 /*
 left rotate at P 
@@ -591,4 +601,25 @@ struct node* rightRotate(struct node *root, int key){
 	
 	root->parent = root;
 	return root;
+}
+
+void printLevelOrder(struct node* root,struct node* nil)
+{
+    int h = height(root,nil);
+    int i;
+    for (i=1; i<=h; i++)
+        printGivenLevel(root, i,nil);
+}
+ 
+void printGivenLevel(struct node* root, int level, struct node* nil)
+{
+    if (root == nil)
+        return;
+    if (level == 1)
+        printf("%d @ h=%d ::p = %d \t col = %d \n", root->key, height(root,nil), root->parent->key, root->colour);
+    else if (level > 1)
+    {
+        printGivenLevel(root->left, level-1, nil);
+        printGivenLevel(root->right, level-1, nil);
+    }
 }

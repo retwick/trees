@@ -3,13 +3,13 @@
 arguments: key
 return: pointer to the node created
 */
-struct node* createNode(int );
+struct node* createNode(int, struct node* );
 
 /*insert by maintaining red-black property
 arguments: pointer to root of tree, key
 return: pointer to root.
 */
-struct node* RBinsert(struct node* , int );
+struct node* RBinsert(struct node* , int , struct node*);
 
 /*function to delete a node
 arguments: pointer to the root, key
@@ -35,9 +35,9 @@ function to get height of node
 arguments: pointer to the node
 return: heighht of node
 */
-int height(struct node* );
+int height(struct node*, struct node* );
 
-void printLevelOrder(struct node* );
+
 
 struct node* leftRotate(struct node *, int );
 
@@ -46,3 +46,7 @@ struct node* rightRotate(struct node *, int );
 void RBcolour(struct node **root, int key);
 
 struct node* findDoubleBlack(struct node* );
+
+void printLevelOrder(struct node* root,struct node* nil);
+
+void printGivenLevel(struct node* root, int level, struct node* nil);
