@@ -15,7 +15,7 @@ struct node* RBinsert(struct node* , int , struct node*);
 arguments: pointer to the root, key
 return: pointer to the root of the subtree where node is deleted
 */
-struct node* delete(struct node** ,int);
+struct node* delete(struct node**, struct node* ,struct node*);
 
 /*query an element
 arguments: pointer to root of tree, query element
@@ -39,9 +39,9 @@ int height(struct node*, struct node* );
 
 
 
-struct node* leftRotate(struct node *, int );
+struct node* leftRotate(struct node *, int, struct node * );
 
-struct node* rightRotate(struct node *, int );
+struct node* rightRotate(struct node *, int, struct node* );
 
 void RBcolour(struct node **root, int key);
 
@@ -50,3 +50,7 @@ struct node* findDoubleBlack(struct node* );
 void printLevelOrder(struct node* root,struct node* nil);
 
 void printGivenLevel(struct node* root, int level, struct node* nil);
+
+struct node* createNil(struct node **ptr);
+
+void RBdelete(struct node **root,int key, struct node *nil);

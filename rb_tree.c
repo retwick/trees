@@ -27,7 +27,7 @@ struct node* createNode(int key,struct node* nil){
 
 struct node* createNil(struct node **ptr){
 	*ptr = createNode(-1,*ptr);
-    printf("nil %d\n", (*ptr)->key);
+    //printf("nil %d\n", (*ptr)->key);
     (*ptr)->colour = 1;
 }
 
@@ -74,12 +74,12 @@ struct node* RBinsert(struct node* root, int key, struct node* nil){
 				if(z == z->parent->right){
 					//CASE 2
 					z = z->parent;
-					root = leftRotate(root,z->key);
+					root = leftRotate(root,z->key,nil);
 				}
 				//CASE 3
 				z->parent->colour = 1;
 				z->parent->parent->colour = 0;
-				root = rightRotate(root, z->parent->parent->key);
+				root = rightRotate(root, z->parent->parent->key,nil);
 				z = z->parent;
 			}
 		}
@@ -97,12 +97,12 @@ struct node* RBinsert(struct node* root, int key, struct node* nil){
 					if(z == z->parent->left){
 					//CASE 2
 					z = z->parent;
-					root = rightRotate(root,z->key);
+					root = rightRotate(root,z->key,nil);
 				}
 				//CASE 3
 				z->parent->colour = 1;
 				z->parent->parent->colour = 0;
-				root = leftRotate(root, z->parent->parent->key);
+				root = leftRotate(root, z->parent->parent->key,nil);
 				z=z->parent;
 			}
 		}
@@ -136,41 +136,65 @@ void RBcolour(struct node **root, int key){
 }
 
 
+
+//transplant u with v
+// u will be replaced by v
+//p(u) will become parent of v
+void RBtransplant(struct node** root,struct node** u, struct node** v, struct node* nil){
+	if((*u)->parent == nil){
+		*root = *v;
+	}
+	else if(*u == (*u)->parent->left){
+		(*u)->parent->left = *v;
+	}
+	else {
+		(*u)->parent->right = *v;
+	}
+	(*v)->parent = (*u)->parent;
+}
+
+void RBdelete(struct node **root,int key, struct node *nil){
+	delete(root, lookupNode(*root, key) ,nil);
+
+}
+
+
+void RBdeleteFix(struct node **root, struct node**x), struct node* nil{
+	
+}
+
 /*function to delete a node
 assuming the node to be deleted is the root of the subtree we delete the node.
 arguments: pointer to the root, key
 return: pointer to the root of the subtree where node is deleted
 */
 
-//implement parent relations
-struct node* delete(struct node** root,int key){
-	
-	if(*root == NULL){
-		return *root;
-	}
-	if(key == (*root)->key){
-		//node is a red leaf
-		//done
-		if(((*root)->left == NULL)&&((*root)->right == NULL)){	
-			RBcolour(root,(*root)->key);	
-			free(*root);
-			return NULL;
-		}
-		//has only right sub tree
-		else if((*root)->left == NULL){
-			RBcolour(root,(*root)->key);			
-			struct node* temp = *root;
-			(*root)->right->parent =  (*root)->parent;
-			free(*root);
-			return temp->right;
+struct node* delete(struct node** root,struct node* z, struct node* nil){
+	//z is to be deleted
+	//y = z
+	struct node * temp;
+	int originalColour = z->colour;
+	//has only right sub tree
+	if(z->left == nil){
+		//RBcolour(root,(*root)->key);
+		//transplanting z with z.right
+		temp = z->right;
+		RBtransplant(root,&z, &(z->right), nil);
+		//struct node* temp = *root;
+		//(*root)->right->parent =  (*root)->parent;
+		//********free(z);
+		//return temp->right;
 		}
 		//has only left sub tree
-		else if((*root)->right == NULL){
-			RBcolour(root,(*root)->key);
-			struct node* temp = *root;
-			(*root)->left->parent =  (*root)->parent;
-			free(*root);
-			return temp->left;
+	else if(z->right == nil){
+		//RBcolour(root,(*root)->key);
+		//transplanting z with z.left
+		temp = z->left;
+		RBtransplant(root, &z, &(z->left), nil);
+		//struct node* temp = *root;
+		//(*root)->left->parent =  (*root)->parent;
+		//*******8free(*root);
+		//return temp->left;
 		}
 		/*
 		has both left and right sub tree
@@ -179,27 +203,36 @@ struct node* delete(struct node** root,int key){
 		delete x . 
 		x will not have two subtrees, so this is reduced to previous case
 		*/
+	else{
+		struct node* y = minVal(z->right);
+		originalColour = y->colour;
+		temp =y->right;
+		if(y->parent == z)
+				temp->parent = y;
 		else{
-			int x = (minVal((*root)->right))->key;
-			(*root)->key = x;
-			(*root)->right = delete(&(*root)->right,x);
-			return *root;
+			//transplant y with y.right
+			RBtransplant(root, &y, &(y->right), nil);
+			y->right = z->right;
+			y->right->parent = y;
+			RBtransplant(root, &z, &y, nil);
+			y->left = z->left;
+			y->left->parent = y;
+			y->colour = z->colour;
 		}
+
+	if(originalColour == 1){
+		RBdeleteFix(root,&temp,nil); //temp is double black or red-black
 	}
-	else if(key < (*root)->key){
-		(*root)->left = delete(&(*root)->left,key);
+
 	}
-	else if(key > (*root)->key){
-		(*root)->right = delete(&(*root)->right,key);
-	}
-	return *root;
 }
 
+
+//Red black property fixing after having a double black
 struct node* RBheightfix(struct node* root, struct node* nil){
-	if(root == NULL){
-		return NULL;
+	if(root == nil){
+		return nil;
 	}
-	struct node * x = findDoubleBlack(root);
 	//printf("inside function: %d\n", x->key);
 	if(x == NULL){
 		//printf("no more double black\n");
@@ -233,7 +266,7 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				t = s->colour;
 				s->colour = x->parent->colour;
 				x->parent->colour = t;
-				root = leftRotate(root, x->parent->key);
+				root = leftRotate(root, x->parent->key,nil);
 				x->colour = 1;
 				printf("case 1.1.1 left rotate x = %d height = %d\n", x->key,height(root,nil) );
 				printLevelOrder(root,nil);
@@ -253,7 +286,7 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				t = s->colour;
 				s->colour = x->parent->colour;
 				x->parent->colour = t;
-				root = leftRotate(root, x->parent->key);
+				root = leftRotate(root, x->parent->key, nil);
 				x->colour = 1;
 
 			}
@@ -268,7 +301,7 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				t = s->colour;
 				s->colour = s->left->colour;
 				s->left->colour = t;
-				root = rightRotate(root, s->key);
+				root = rightRotate(root, s->key, nil);
 				root = RBheightfix(root,nil);
 
 			}
@@ -295,7 +328,7 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 			*/
 			x->parent->colour = 0;
 			s->colour = 1;
-			root = leftRotate(root,x->parent->key);
+			root = leftRotate(root,x->parent->key, nil);
 			root = RBheightfix(root,nil);
 		}
 
@@ -320,7 +353,7 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				t = s->colour;
 				s->colour = x->parent->colour;
 				x->parent->colour = t;
-				root = rightRotate(root, x->parent->key);
+				root = rightRotate(root, x->parent->key, nil);
 				x->colour = 1;
 
 			}
@@ -337,7 +370,7 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				t = s->colour;
 				s->colour = x->parent->colour;
 				x->parent->colour = t;
-				root = rightRotate(root, x->parent->key);
+				root = rightRotate(root, x->parent->key, nil);
 				x->colour = 1;
 
 			}
@@ -352,7 +385,7 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				t = s->colour;
 				s->colour = s->right->colour;
 				s->right->colour = t;
-				root = leftRotate(root, s->key);
+				root = leftRotate(root, s->key, nil);
 				root = RBheightfix(root,nil);
 
 			}
@@ -379,7 +412,7 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 			*/
 			x->parent->colour = 0;
 			s->colour = 1;
-			root = rightRotate(root,x->parent->key);
+			root = rightRotate(root,x->parent->key, nil);
 			root = RBheightfix(root,nil);
 		}		
 	}
@@ -387,18 +420,6 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 	return(root);
 }
 
-struct node * findDoubleBlack(struct node* root){
-	struct node *x = NULL; 
-	if(root->colour == 2)
-		return root;
-	if(root->left != NULL)
-		x = findDoubleBlack(root->left);
-		if(x != NULL) return x;
-
-	if ((x == NULL) && (root->right != NULL))
-		x = findDoubleBlack(root->right);
-	return x;
-}
 
 
 /*query an element
@@ -545,7 +566,7 @@ left rotate at P
    B   C		A   B
 */
 
-struct node* leftRotate(struct node *root, int key){
+struct node* leftRotate(struct node *root, int key, struct node* nil){
 	//find parent of ptr, make parent of ptr as parent of ptr->right
 	struct node* ptr = lookupNode(root, key);
 	struct node* ptr_right = ptr->right;
@@ -553,13 +574,13 @@ struct node* leftRotate(struct node *root, int key){
 
 	ptr->right = ptr->right->left;
 	//!=NIL
-	if(ptr_right->left!=NULL)
+	if(ptr_right->left!=nil)
 		ptr_right->left->parent = ptr;
 	
 	ptr_right->parent = ptr->parent;
 	
 	// == NIL
-	if(ptr->parent == ptr){
+	if(ptr->parent == nil){
 		root = ptr_right;
 	}
 	else if (ptr == ptr->parent->left)
@@ -571,23 +592,24 @@ struct node* leftRotate(struct node *root, int key){
 	ptr_right->left = ptr;
 	ptr->parent = ptr_right;
 	
-	root->parent = root;
+	//replacing with nil
+	root->parent = nil;
 	return root;
 }
 
-struct node* rightRotate(struct node *root, int key){
+struct node* rightRotate(struct node *root, int key, struct node* nil){
 	//find parent of ptr, make parent of ptr as parent of ptr->left
 	struct node* ptr = lookupNode(root, key);
 	struct node* ptr_left = ptr->left;
 
 
 	ptr->left = ptr->left->right;
-	if(ptr_left->right!=NULL)
+	if(ptr_left->right!=nil)
 		ptr_left->right->parent = ptr;
 	
 	ptr_left->parent = ptr->parent;
 	
-	if(ptr->parent == ptr){
+	if(ptr->parent == nil){
 		root = ptr_left;
 	}
 	else if (ptr == ptr->parent->right)
@@ -599,7 +621,7 @@ struct node* rightRotate(struct node *root, int key){
 	ptr_left->right = ptr;
 	ptr->parent = ptr_left;
 	
-	root->parent = root;
+	root->parent = nil;
 	return root;
 }
 
