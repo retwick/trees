@@ -54,3 +54,5 @@ void printGivenLevel(struct node* root, int level, struct node* nil);
 struct node* createNil(struct node **ptr);
 
 void RBdelete(struct node **root,int key, struct node *nil);
+
+struct node* RBheightfix(struct node** root, struct node *x, struct node* nil);

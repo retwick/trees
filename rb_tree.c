@@ -110,32 +110,6 @@ struct node* RBinsert(struct node* root, int key, struct node* nil){
 	root->colour = 1;
 }
 
-//function to push black colour
-
-void RBcolour(struct node **root, int key){
-	//v is the node to be deleted
-	//u is the node to replace v
-	
-	struct node* v = lookupNode(*root, key);
-	struct node* u ;
-	//deleting a node with atleast one child
-	if(v->left != NULL && v->right == NULL){
-		u = v->left;
-		u->colour = 1;
-	}
-	else if(v->left == NULL && v->right != NULL){
-		u = v->right;
-		u->colour = 1;
-	}
-	//delting leaf node
-	else if(v->left == NULL && v->right == NULL){
-		u = v->parent;
-		u->colour += v->colour;
-	}	
-	return ;
-}
-
-
 
 //transplant u with v
 // u will be replaced by v
@@ -158,10 +132,6 @@ void RBdelete(struct node **root,int key, struct node *nil){
 
 }
 
-
-void RBdeleteFix(struct node **root, struct node**x), struct node* nil{
-	
-}
 
 /*function to delete a node
 assuming the node to be deleted is the root of the subtree we delete the node.
@@ -221,28 +191,28 @@ struct node* delete(struct node** root,struct node* z, struct node* nil){
 		}
 
 	if(originalColour == 1){
-		RBdeleteFix(root,&temp,nil); //temp is double black or red-black
+		RBheightfix(root,temp,nil); //temp is double black or red-black
 	}
-
+	
 	}
 }
 
 
 //Red black property fixing after having a double black
-struct node* RBheightfix(struct node* root, struct node* nil){
-	if(root == nil){
+struct node* RBheightfix(struct node** root, struct node *x, struct node* nil){
+	if(x == nil){
 		return nil;
 	}
-	//printf("inside function: %d\n", x->key);
-	if(x == NULL){
-		//printf("no more double black\n");
-		return root;
+	if(x->colour == 0){
+		x->colour = 1;
+		return *root;
 	}
-	printf("inside RBheightfix: x = %d\n", x->key);
-	printLevelOrder(root, nil);
-	printf(" \n");
+	//printf("inside function: %d\n", x->key);
+
+	//printf("inside RBheightfix: x = %d\n", x->key);
+	//printf(" \n");
 	//check if x is root, drop the double black
-	if(x->parent == x){
+	if(x == *root){
 		x->colour = 1;
 		return x;
 	}
@@ -250,7 +220,7 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 	//case 1: x is left child of p(x)
 	if(x == x->parent->left){
 		s = x->parent->right;
-		if(s == NULL) return root;
+		
 		//case 1.1 s is black
 		if(s->colour == 1){
 			//case 1.1.1 s.left is black, s.right is red
@@ -260,17 +230,15 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				swap colour of s and p(x)
 				left rotate at p(x)
 				make x single black
-				*/
-				s->right->colour = 1;
-				int t;
-				t = s->colour;
+				*/								
 				s->colour = x->parent->colour;
-				x->parent->colour = t;
-				root = leftRotate(root, x->parent->key,nil);
-				x->colour = 1;
-				printf("case 1.1.1 left rotate x = %d height = %d\n", x->key,height(root,nil) );
-				printLevelOrder(root,nil);
-				printf(" \n");
+				x->parent->colour = 1;
+				s->right->colour = 1;
+				*root = leftRotate(*root, x->parent->key,nil);
+				x = *root;
+				//printf("case 1.1.1 left rotate x = %d height = %d\n", x->key,height(root,nil) );
+				//printLevelOrder(root,nil);
+				//printf(" \n");
 
 			}
 			//case 1.1.2 s.left is red,   s.right is red
@@ -281,13 +249,11 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				left rotate at p(x)
 				make x single black
 				*/
-				s->right->colour = 1;
-				int t;
-				t = s->colour;
 				s->colour = x->parent->colour;
-				x->parent->colour = t;
-				root = leftRotate(root, x->parent->key, nil);
-				x->colour = 1;
+				x->parent->colour = 1;
+				s->right->colour = 1;
+				*root = leftRotate(*root, x->parent->key,nil);
+				x = *root;
 
 			}
 			//case 1.1.3 s.left is red,   s.right is black
@@ -296,13 +262,12 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				swap s.colour and s.left.colour
 				right rotate at s
 				reduces to case 1.1.1
-				*/
-				int t;
-				t = s->colour;
-				s->colour = s->left->colour;
-				s->left->colour = t;
-				root = rightRotate(root, s->key, nil);
-				root = RBheightfix(root,nil);
+				*/				
+				s->colour = 0;
+				s->left->colour = 1;
+				*root = rightRotate(*root, s->key, nil);
+				s = x->parent->right;
+				//root = RBheightfix(root,nil);
 
 			}
 			//case 1.1.4 s.left is black, s.right is black
@@ -313,9 +278,10 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				--this reduces to previous case with new x as p(x) 			
 				make s red				
 				*/
-				x->parent->colour = x->parent->colour + 1;
-				root = RBheightfix(root,nil);
+				
+				x = x->parent;				
 				s->colour = 0;
+				//root = RBheightfix(root,nil);
 
 			}
 		}
@@ -328,16 +294,17 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 			*/
 			x->parent->colour = 0;
 			s->colour = 1;
-			root = leftRotate(root,x->parent->key, nil);
-			root = RBheightfix(root,nil);
+			*root = leftRotate(*root,x->parent->key, nil);
+			s = x->parent->right;
+			//root = RBheightfix(root,nil);
 		}
 
 	}
+
 	//case 2: x is right child of p(x)
-	else{
-		s= x->parent->left;
-		//test
-		if(s == NULL) return root;
+	if(x == x->parent->right){
+		s = x->parent->left;
+		
 		//case 2.1 s is black
 		if(s->colour == 1){
 			//case 2.1.1 s.right is black, s.left is red
@@ -347,14 +314,15 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				swap colour of s and p(x)
 				right rotate at p(x)
 				make x single black
-				*/
-				s->left->colour = 1;
-				int t;
-				t = s->colour;
+				*/								
 				s->colour = x->parent->colour;
-				x->parent->colour = t;
-				root = rightRotate(root, x->parent->key, nil);
-				x->colour = 1;
+				x->parent->colour = 1;
+				s->left->colour = 1;
+				*root = rightRotate(*root, x->parent->key,nil);
+				x = *root;
+				//printf("case 1.1.1 right rotate x = %d height = %d\n", x->key,height(root,nil) );
+				//printLevelOrder(root,nil);
+				//printf(" \n");
 
 			}
 			//case 2.1.2 s.right is red,   s.left is red
@@ -365,13 +333,11 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				right rotate at p(x)
 				make x single black
 				*/
-				s->left->colour = 1;
-				int t;
-				t = s->colour;
 				s->colour = x->parent->colour;
-				x->parent->colour = t;
-				root = rightRotate(root, x->parent->key, nil);
-				x->colour = 1;
+				x->parent->colour = 1;
+				s->left->colour = 1;
+				*root = rightRotate(*root, x->parent->key,nil);
+				x = *root;
 
 			}
 			//case 2.1.3 s.right is red,   s.left is black
@@ -379,14 +345,14 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				/*
 				swap s.colour and s.right.colour
 				left rotate at s
-				reduces to case 2.1.1
+				reduces to case 1.1.1
 				*/
 				int t;
-				t = s->colour;
-				s->colour = s->right->colour;
-				s->right->colour = t;
-				root = leftRotate(root, s->key, nil);
-				root = RBheightfix(root,nil);
+				s->colour = 0;
+				s->right->colour = 1;
+				*root = leftRotate(*root, s->key, nil);
+				s = x->parent->left;
+				//root = RBheightfix(root,nil);
 
 			}
 			//case 2.1.4 s.right is black, s.left is black
@@ -397,9 +363,10 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 				--this reduces to previous case with new x as p(x) 			
 				make s red				
 				*/
-				x->parent->colour = x->parent->colour + 1;
-				root = RBheightfix(root,nil);
+				
+				x = x->parent;				
 				s->colour = 0;
+				//root = RBheightfix(root,nil);
 
 			}
 		}
@@ -408,16 +375,17 @@ struct node* RBheightfix(struct node* root, struct node* nil){
 			/*
 			swap p(x).col and s.col
 			right rotate at p(x)
-			reduces to case 2.1
+			reduces to case 1.1
 			*/
 			x->parent->colour = 0;
 			s->colour = 1;
-			root = rightRotate(root,x->parent->key, nil);
-			root = RBheightfix(root,nil);
-		}		
+			*root = rightRotate(*root,x->parent->key, nil);
+			s = x->parent->left;
+			//root = RBheightfix(root,nil);
+		}
+
 	}
-	//root = RBheightfix(root);
-	return(root);
+	*root = RBheightfix(root,x,nil);
 }
 
 
