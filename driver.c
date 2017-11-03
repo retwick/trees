@@ -11,7 +11,7 @@ int main(int argc, char const *argv[])
     createNil(&nil);
     struct node* root = nil;
  
-
+/*
     root = RBinsert(root,3,nil);
     root = RBinsert(root,2,nil);
     root = RBinsert(root,5,nil);
@@ -29,15 +29,15 @@ int main(int argc, char const *argv[])
  
     //root = RBcolour(root,1);
     //root = RBcolour(root,6);
-    RBdelete(&root,15,nil);
+    RBdelete(&root,5,nil);
     //delete(&root,lookupNode(root,8),nil);
     printLevelOrder(root,nil);
     printf(" \n");
     //root = RBheightfix(root);
     //printLevelOrder(root);
   
+*/
 
-/*
     int i ;
     float start_time, end_time, tot_time;    
     //commamds for gnuplot
@@ -77,6 +77,6 @@ int main(int argc, char const *argv[])
         //Send commands to gnuplot one by one.
         fprintf(gnuplotPipe, "%s \n", commandsForGnuplot[n]); 
     }
-    */
+    
    return 0;  
 }

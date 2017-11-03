@@ -28,7 +28,7 @@ function to find minimum value stored in the tree
 arguments: pointer to the root
 return: min value
 */
-struct node * minVal(struct node* );
+struct node * minVal(struct node* , struct node*);
 
 /*
 function to get height of node
