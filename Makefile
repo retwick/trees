@@ -1,2 +1,2 @@
-rb: rb_tree.c driver.c
-	gcc -o rb rb_tree.c driver.c
+treerebuild: pointertree.c driver.c
+	gcc -w -o treerebuild pointertree.c driver.c
